@@ -95,9 +95,12 @@ fun HomeScreen(
     }
 
     var started by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         started = true
+        delay(2000)
+        loading = false
     }
 
     var showMessage by remember { mutableStateOf(false) }
@@ -166,17 +169,33 @@ fun HomeScreen(
             FeatureTile(Icons.Default.Sensors, "Sensor", 3, started, onSensorClick, Modifier.weight(1f))
         }
 
-        val walking = manager.steps >= 1000
+        AnimatedVisibility(
+            visible = loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                LoadingAnimation(
+                    rawRes = R.raw.loading,
+                    modifier = Modifier.size(120.dp)
+                )
+                Text("Loading...", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
 
-        LoadingAnimation(
-            rawRes = if (walking) R.raw.walking else R.raw.loading,
-            modifier = Modifier.size(120.dp)
-        )
-
-        Text(
-            text = if (walking) "Walking" else "Loading...",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        AnimatedVisibility(
+            visible = !loading && manager.steps >= 1000,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                LoadingAnimation(
+                    rawRes = R.raw.walking,
+                    modifier = Modifier.size(120.dp)
+                )
+                Text("Walking", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
     }
 }
 
@@ -248,6 +267,7 @@ private fun StepCard(steps: Int, started: Boolean) {
 
             LinearProgressIndicator(
                 progress = { progress },
+                trackColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(10.dp)
