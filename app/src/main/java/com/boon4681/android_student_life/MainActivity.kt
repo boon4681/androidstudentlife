@@ -4,6 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -119,7 +125,11 @@ fun StudentLifeApp() {
             startDestination = HOME,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(HOME) {
+            composable(
+                HOME,
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }
+            ) {
                 HomeScreen(
                     onCameraClick = { navController.navigate(CAMERA) },
                     onMusicClick = { navController.navigate(MUSIC) },
@@ -127,16 +137,33 @@ fun StudentLifeApp() {
                     onSensorClick = { navController.navigate(SENSOR) }
                 )
             }
-            composable(CAMERA) {
+            composable(
+                CAMERA,
+                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(400)) },
+                exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(400)) },
+                popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(400)) }
+            ) {
                 CameraScreen()
             }
-            composable(MUSIC) {
+            composable(
+                MUSIC,
+                enterTransition = { fadeIn(tween(500)) },
+                exitTransition = { fadeOut(tween(500)) }
+            ) {
                 MusicScreen()
             }
-            composable(VIDEO) {
+            composable(
+                VIDEO,
+                enterTransition = { scaleIn(tween(400), initialScale = 0.8f) + fadeIn(tween(400)) },
+                exitTransition = { scaleOut(tween(400), targetScale = 0.8f) + fadeOut(tween(400)) }
+            ) {
                 VideoScreen()
             }
-            composable(SENSOR) {
+            composable(
+                SENSOR,
+                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up, tween(400)) },
+                exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400)) }
+            ) {
                 StepCounterScreen()
             }
         }

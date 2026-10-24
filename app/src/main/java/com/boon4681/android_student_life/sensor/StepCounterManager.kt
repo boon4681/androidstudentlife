@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import kotlin.math.sqrt
 
 class StepCounterManager(
     private val context: Context
@@ -25,7 +26,7 @@ class StepCounterManager(
 
     val hasStepSensor = stepSensor != null
 
-    var steps by mutableIntStateOf(0)
+    var steps by mutableIntStateOf(if (stepSensor == null) detectedSteps else 0)
         private set
 
     var accelX by mutableFloatStateOf(0f)
@@ -59,10 +60,30 @@ class StepCounterManager(
                 accelX = event.values[0]
                 accelY = event.values[1]
                 accelZ = event.values[2]
+                if (!hasStepSensor) {
+                    detectStep(sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ))
+                }
             }
         }
     }
 
+    private fun detectStep(magnitude: Float) {
+        if (!aboveThreshold && magnitude > STEP_HIGH) {
+            aboveThreshold = true
+            detectedSteps++
+            steps = detectedSteps
+        } else if (aboveThreshold && magnitude < STEP_LOW) {
+            aboveThreshold = false
+        }
+    }
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
+
+    companion object {
+        private const val STEP_HIGH = 12f
+        private const val STEP_LOW = 10f
+        private var detectedSteps = 0
+        private var aboveThreshold = false
     }
 }

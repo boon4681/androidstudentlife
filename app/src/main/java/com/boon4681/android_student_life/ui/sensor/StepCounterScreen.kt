@@ -142,7 +142,7 @@ fun StepCounterScreen() {
             }
         } else if (!manager.hasStepSensor) {
             Text(
-                text = "เครื่องนี้ไม่มี Step Counter Sensor",
+                text = "เครื่องนี้ไม่มี Step Counter Sensor จึงนับก้าวจาก Accelerometer แทน",
                 color = MaterialTheme.colorScheme.error
             )
         }
